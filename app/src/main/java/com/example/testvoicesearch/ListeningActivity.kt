@@ -13,7 +13,7 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import com.example.testvoicesearch.databinding.ActivityListeningBinding
 
-class ListeningActivity  : AppCompatActivity(), RecognitionListener {
+class ListeningActivity : AppCompatActivity(), RecognitionListener {
 
     private lateinit var binding: ActivityListeningBinding
     private lateinit var speechRecognizer: SpeechRecognizer
@@ -42,22 +42,22 @@ class ListeningActivity  : AppCompatActivity(), RecognitionListener {
 
     override fun onStart() {
         super.onStart()
-         Log.d("KLDIMSUM", "STARTING LISTENER °°°°°°°°°°°°°°°")
+        Log.d("ListeningActivity", "STARTING LISTENER °°°°°°°°°°°°°°°")
         speechRecognizer.startListening(speechRecognizerIntent)
     }
 
     override fun onStop() {
         super.onStop()
-         Log.d("KLDIMSUM", "KILLING LISTENER °°°°°°°°°°°°°°°")
+        Log.d("ListeningActivity", "KILLING LISTENER °°°°°°°°°°°°°°°")
         speechRecognizer.destroy()
     }
 
     override fun onReadyForSpeech(p0: Bundle?) {
-        Log.d("KLDIMSUM", "READY FOR SPEECH °°°°°°°°°°°°°°°°")
+        Log.d("ListeningActivity", "READY FOR SPEECH °°°°°°°°°°°°°°°°")
     }
 
     override fun onBeginningOfSpeech() {
-        Log.d("KLDIMSUM", "BEGINNING OF SPEECH -------")
+        Log.d("ListeningActivity", "BEGINNING OF SPEECH -------")
     }
 
     override fun onRmsChanged(p0: Float) {
@@ -67,23 +67,24 @@ class ListeningActivity  : AppCompatActivity(), RecognitionListener {
     }
 
     override fun onEndOfSpeech() {
-        Log.d("KLDIMSUM", "END OF SPEECH -------")
+        Log.d("ListeningActivity", "END OF SPEECH -------")
     }
 
     override fun onError(p0: Int) {
         if (p0 == SpeechRecognizer.ERROR_NO_MATCH) {
-            Log.d("KLDIMSUM", "ERROR:NO MATCH")
+            Log.d("ListeningActivity", "ERROR:NO MATCH")
             restartListener()
-        } else if(p0 == SpeechRecognizer.ERROR_CLIENT) {
-             Log.d("KLDIMSUM", "ERROR:CLIENT")
+        } else if (p0 == SpeechRecognizer.ERROR_CLIENT) {
+            Log.d("ListeningActivity", "ERROR:CLIENT")
             Toast.makeText(this, "ERROR:CLIENT", Toast.LENGTH_LONG).show()
-        } else if (p0 == SpeechRecognizer.ERROR_RECOGNIZER_BUSY)   {
-             Log.d("KLDIMSUM", "ERROR:BUSY")
+        } else if (p0 == SpeechRecognizer.ERROR_RECOGNIZER_BUSY) {
+            Log.d("ListeningActivity", "ERROR:BUSY")
         }
+        Log.d("ListeningActivity", "ERROR:$p0")
     }
 
     private fun restartListener() {
-        Log.d("KLDIMSUM", "RESTARTING LISTENER °°°°°°°°°°°°°°°")
+        Log.d("ListeningActivity", "RESTARTING LISTENER °°°°°°°°°°°°°°°")
         speechRecognizer.stopListening()
         speechRecognizer.startListening(speechRecognizerIntent)
     }
@@ -92,16 +93,16 @@ class ListeningActivity  : AppCompatActivity(), RecognitionListener {
     override fun onResults(bundle: Bundle) {
         val data = bundle.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
         binding.recognizedSpeech.text = getUpdatedString(data?.toList())
-        Log.d("KLDIMSUM", "Sending to Search: $lastResult")
+        Log.d("ListeningActivity", "Sending to Search: $lastResult")
         Toast.makeText(this, "Sending to Search: $lastResult", Toast.LENGTH_LONG).show()
-        onBackPressed()
+        finish()
     }
 
     @SuppressLint("SetTextI18n")
     override fun onPartialResults(bundle: Bundle?) {
         val data = bundle?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
         binding.recognizedSpeech.text = getUpdatedString(data?.toList())
-        Log.d("KLDIMSUM", "PARTIAL RESULT RECEIVED: $lastResult")
+        Log.d("ListeningActivity", "PARTIAL RESULT RECEIVED: $lastResult")
     }
 
     override fun onEvent(p0: Int, p1: Bundle?) {

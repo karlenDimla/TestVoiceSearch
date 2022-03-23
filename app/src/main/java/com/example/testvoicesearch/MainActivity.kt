@@ -26,11 +26,15 @@ import android.view.MotionEvent
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.widget.Toast
+import android.app.Activity
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.view.View
+import com.google.android.material.snackbar.Snackbar
 
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
 
     @SuppressLint("ClickableViewAccessibility")
@@ -40,25 +44,12 @@ class MainActivity : AppCompatActivity() {
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
         setSupportActionBar(binding.toolbar)
-
-        val navController = findNavController(R.id.nav_host_fragment_content_main)
-        appBarConfiguration = AppBarConfiguration(navController.graph)
-        setupActionBarWithNavController(navController, appBarConfiguration)
-        binding.fab.visibility = GONE
-
+        binding.voiceSearch.visibility = GONE
         requestPermission()
 
-        binding.fab.setOnTouchListener { _, motionEvent ->
-            when (motionEvent.action) {
-                MotionEvent.ACTION_DOWN -> {
-                    startActivity(Intent(this, ListeningActivity::class.java))
-                    return@setOnTouchListener true
-                }
-                else -> {}
-            }
-            return@setOnTouchListener super.onTouchEvent(motionEvent)
+        binding.voiceSearch.setOnClickListener {
+            startActivity(Intent(this, ListeningActivity::class.java))
         }
     }
 
@@ -78,12 +69,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onSupportNavigateUp(): Boolean {
-        val navController = findNavController(R.id.nav_host_fragment_content_main)
-        return navController.navigateUp(appBarConfiguration)
-                || super.onSupportNavigateUp()
-    }
-
     @RequiresApi(Build.VERSION_CODES.S)
     private fun requestPermission() {
         if (SpeechRecognizer.isOnDeviceRecognitionAvailable(this)) {
@@ -91,14 +76,42 @@ class MainActivity : AppCompatActivity() {
                     this, Manifest.permission.RECORD_AUDIO
                 ) != PackageManager.PERMISSION_GRANTED
             ) {
-                ActivityCompat.requestPermissions(
-                    this,
-                    arrayOf(Manifest.permission.RECORD_AUDIO),
-                    4021
-                )
+                if (shouldShowRequestPermissionRationale(Manifest.permission.RECORD_AUDIO)) {
+                    binding.root.showSnackbar(
+                        "RECORD_AUDIO required",
+                        Snackbar.LENGTH_INDEFINITE,
+                        "OK"
+                    ) {
+                        ActivityCompat.requestPermissions(
+                            this,
+                            arrayOf(Manifest.permission.RECORD_AUDIO),
+                            4021
+                        )
+                    }
+                } else {
+                    ActivityCompat.requestPermissions(
+                        this,
+                        arrayOf(Manifest.permission.RECORD_AUDIO),
+                        4021
+                    )
+                }
             } else {
-                binding.fab.visibility = VISIBLE
+                binding.voiceSearch.visibility = VISIBLE
             }
+        }
+    }
+
+    private fun View.showSnackbar(
+        msg: String,
+        length: Int,
+        actionMessage: CharSequence?,
+        action: (View) -> Unit
+    ) {
+        val snackbar = Snackbar.make(this, msg, length)
+        if (actionMessage != null) {
+            snackbar.setAction(actionMessage) {
+                action(this)
+            }.show()
         }
     }
 
@@ -113,7 +126,7 @@ class MainActivity : AppCompatActivity() {
                 if ((grantResults.isNotEmpty() &&
                             grantResults[0] == PackageManager.PERMISSION_GRANTED)
                 ) {
-                    binding.fab.visibility = VISIBLE
+                    binding.voiceSearch.visibility = VISIBLE
                 }
                 return
             }
@@ -125,4 +138,5 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+
 }
